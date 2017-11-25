@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
+import com.beust.jcommander.JCommander;
+
 /**
  * Check classification accuracy for UCR time series data sets.
  * Distance measures: 1NNED (1Nearest Neighbor Euclidean Distance)  
@@ -94,8 +96,13 @@ public class ucr_TSeries1NNED_Test {
 			}
 	
 	public static void main(String[] args) {
-		String train_filename="C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN";
-		String test_filename="C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN";
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		//"C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN";
+		//"C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN"
+		String train_filename= args[0];
+		String test_filename=args[1];
 		long startTime=System.currentTimeMillis();
 		List<sampleSeries>train_List=dataLoad(train_filename);
 		List<sampleSeries>test_List=dataLoad(test_filename);		
