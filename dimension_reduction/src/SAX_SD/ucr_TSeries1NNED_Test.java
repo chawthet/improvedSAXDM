@@ -99,8 +99,6 @@ public class ucr_TSeries1NNED_Test {
 		if(args.length ==0){
 			System.exit(-1);
 		}
-		//"C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN";
-		//"C://Users//chawt//git//SAX_SD//dimension_reduction//resources//dataset//CBF//CBF_TRAIN"
 		String train_filename= args[0];
 		String test_filename=args[1];
 		long startTime=System.currentTimeMillis();
