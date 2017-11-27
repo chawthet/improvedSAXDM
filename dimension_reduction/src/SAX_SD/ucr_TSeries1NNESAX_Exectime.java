@@ -7,28 +7,29 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import SAX_SD.ucr_TSeries1NNSAXTD_Test.DistanceComparator;
-import SAX_SD.ucr_TSeries1NNSAXTD_Test.Result;
-import SAX_SD.ucr_TSeries1NNSAXTD_Test.Result1;
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * Implement ESAX scheme 
+ * check classification accuracy using 1NN ED distance
+ * for UCR time series data sets
+ * check execution time for each data set
+ * @author chawt
+ *
+ */
 public class ucr_TSeries1NNESAX_Exectime {
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -163,13 +164,10 @@ public class ucr_TSeries1NNESAX_Exectime {
 								
 			}
 		}
-		//for(int i=0;i< delta_tsdist.length;i++)
-			//System.out.println(delta_tsdist[i][0]+", "+delta_tsdist[i][1]);
 		return maxmin_value;
 	}	
 	public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment, int saxAlpha)
 	{
-		List<Result>innerList=new ArrayList<Result>();		
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();
 		Alphabet normalA = new NormalAlphabet();
@@ -183,18 +181,12 @@ public class ucr_TSeries1NNESAX_Exectime {
 			train_List.get(i).Attributes.toArray(tempArray);
 			test_List.toArray(tempArray1);
 			
-			char[] tSAX_List;
-			char[] qSAX_List;
 			double[][]tmaxmin_value;
 			double[][]qmaxmin_value;
 			char[][]tmaxmeanmin_char;
 			char[][]qmaxmeanmin_char;
 			double saxDist=0;
 			try {
-				//SAX transformation
-				//tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-				//qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-				
 				//max_min array transform to SAX
 				tmaxmin_value=max_min(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.00001), paa_segment);
 				qmaxmin_value=max_min(tsp.znorm(ArrayUtils.toPrimitive(tempArray1), 0.00001), paa_segment);
@@ -279,62 +271,17 @@ public class ucr_TSeries1NNESAX_Exectime {
 			}
 	
 	public static void main(String[] args) {
-		/*
-		 * String []train_filename={
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\synthetic_control\\synthetic_control_TRAIN", 
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Gun_Point\\Gun_Point_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\CBF\\CBF_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FaceAll\\FaceAll_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\OSULeaf\\OSULeaf_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\SwedishLeaf\\SwedishLeaf_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\50words\\50words_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Trace\\Trace_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Two_Patterns\\Two_Patterns_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FaceFour\\FaceFour_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Lighting2\\Lighting2_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Lighting7\\Lighting7_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\yoga\\yoga_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Adiac\\Adiac_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\yoga\\yoga_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FISH\\FISH_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Beef\\Beef_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Coffee\\Coffee_TRAIN",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\OliveOil\\OliveOil_TRAIN" 
-					};
-			String []test_filename={
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\synthetic_control\\synthetic_control_TEST", 
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Gun_Point\\Gun_Point_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\CBF\\CBF_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FaceAll\\FaceAll_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\OSULeaf\\OSULeaf_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\SwedishLeaf\\SwedishLeaf_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\50words\\50words_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Trace\\Trace_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Two_Patterns\\Two_Patterns_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FaceFour\\FaceFour_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Lighting2\\Lighting2_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Lighting7\\Lighting7_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\yoga\\yoga_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Adiac\\Adiac_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\yoga\\yoga_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\FISH\\FISH_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Beef\\Beef_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Coffee\\Coffee_TEST",
-					"D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\OliveOil\\OliveOil_TEST" 
-					};
-		 */
-		ResourceBundle.clearCache();
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\ECG200\\ECG200_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\ECG200\\ECG200_TEST";
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for each dataset
 		int paa_segment=64;
 		int saxAlpha=10;
 		int corrected=0;
 		long totaltime = 0;
 		double temp_dist=0;
-		//for(int y=0;y<25;y++){		
-			List<Result>errRate_List=new ArrayList<Result>();
 			long startTime=System.currentTimeMillis();
 			List<sampleSeries>train_List=dataLoad(train_filename);
 			List<sampleSeries>test_List=dataLoad(test_filename);
@@ -353,8 +300,6 @@ public class ucr_TSeries1NNESAX_Exectime {
 					long elapsedTimeInMillis_1 = endTime - startTime;
 					totaltime=elapsedTimeInMillis_1;	
 					
-				//}
-		ResourceBundle.clearCache();
 		System.out.println("*******************************************");
 		System.out.println("Corrected Label "+ corrected +"Error Rate: "+ temp_dist);
 		System.out.println("Total Execution time for segment size: "+ paa_segment + " : "+ totaltime + "msec");

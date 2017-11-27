@@ -6,28 +6,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import SAX_SD.ucr_TSeries1NNESAX_Test.DistanceComparator;
-import SAX_SD.ucr_TSeries1NNESAX_Test.Result;
-import SAX_SD.ucr_TSeries1NNESAX_Test.Result1;
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
-import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * implement SAX representation 
+ * check 1NNED classification accuracy for UCR time series data sets
+ * parameters for segment size and symbol(alphabet size=10) can be check on paper
+ * 
+ * @author chawt
+ *
+ */
 public class ucr_TSeries1NNSAX_Exectime {
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -56,9 +54,6 @@ public class ucr_TSeries1NNSAX_Exectime {
 	
 	public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment)
 	{
-		List<Result>innerList=new ArrayList<Result>();
-		//TSProcessor tsp=new TSProcessor();
-		//EuclideanDistance edDist=new EuclideanDistance();
 		SAXProcessor saxp=new SAXProcessor();		
 		Alphabet normalA = new NormalAlphabet();
 		double bestsofar=Double.POSITIVE_INFINITY;
@@ -147,10 +142,13 @@ public class ucr_TSeries1NNSAX_Exectime {
 			}
 	
 	public static void main(String[] args) {
-		ResourceBundle.clearCache();
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Coffee\\Coffee_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\Coffee\\Coffee_TEST";
-		int paa_segment=118;	
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for each dataset
+		int paa_segment=32;	
 		//int saxAlpha=10;
 		long totaltime=0;
 		int corrected=0;

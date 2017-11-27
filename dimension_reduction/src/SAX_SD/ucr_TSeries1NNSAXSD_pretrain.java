@@ -158,59 +158,7 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 		}		
 		return SD_value;
 	}	
-	/*public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment, int saxAlpha)
-	{
-		//List<Result>innerList=new ArrayList<Result>();		
-		SAXProcessor saxp=new SAXProcessor();
-		TSProcessor tsp=new TSProcessor();
-		Alphabet normalA = new NormalAlphabet();
-		double best_so_far=Double.POSITIVE_INFINITY;
-		int test_cLabel = -99999;			
-		for(int i=0;i< train_List.size();i++){
-			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
-			Double []tempArray1=new Double[test_List.size()];
-			train_List.get(i).Attributes.toArray(tempArray);
-			test_List.toArray(tempArray1);		
-			
-			char[] tSAX_List;
-			char[] qSAX_List;
-			double[]tSD_value;
-			double[]qSD_value;
-			
-			
-			try {
-				//SAX transformation
-				tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(saxAlpha), 0.00001);
-				qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(saxAlpha), 0.00001);
-				
-				
-				tSD_value=SD(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.00001), paa_segment);
-				qSD_value=SD(tsp.znorm(ArrayUtils.toPrimitive(tempArray1), 0.00001), paa_segment);
-				
-				double SDDist=0;
-				for(int d=0;d< tSD_value.length;d++)
-				{				
-					SDDist+=Math.pow((qSD_value[d]- tSD_value[d]), 2);		
-					//SDDist+=((double)paa_segment/(double)test_List.size())*Math.pow((qSD_value[d]- tSD_value[d]), 2);	
-					
-				}
-				double saxDist=saxp.saxMinDist_update(qSAX_List, tSAX_List, normalA.getDistanceMatrix(saxAlpha), test_List.size(), paa_segment);
-				//System.out.println(SDDist+" : "+ saxDist);
-				double fsaxDist=Math.sqrt(((double)test_List.size()/(double)paa_segment))*Math.sqrt(saxDist+SDDist);
-				if (fsaxDist < best_so_far) {
-					test_cLabel=train_List.get(i).cName;
-					best_so_far=fsaxDist;
-				}			
-				
-			} catch (SAXException e) {				
-				e.printStackTrace();
-			}
-			
-		}		
-		return test_cLabel;		
-	}*/
-	
-			 //simple class to model instances (class + features)
+	 //simple class to model instances (class + features)
 			static class sampleSeries {	
 				List<Double> Attributes=new ArrayList<Double>();
 				int cName;
@@ -242,10 +190,13 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 			}
 	
 	public static void main(String[] args) {
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TEST";
-		
-		int paa_segment=64;
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for CBF dataset
+		int paa_segment=4;
 		int saxAlpha=10;
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();

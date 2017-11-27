@@ -49,42 +49,6 @@ public class ucr_TSeries1NNSAX_pretrain {
 		}
 		return sSeriesList;
 	}
-	
-	/*public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment)
-	{
-		SAXProcessor saxp=new SAXProcessor();		
-		Alphabet normalA = new NormalAlphabet();
-		double bestsofar=Double.POSITIVE_INFINITY;
-		int test_cLabel=-99999;		
-		for(int i=0;i< train_List.size();i++){
-			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
-			Double []tempArray1=new Double[test_List.size()];
-			train_List.get(i).Attributes.toArray(tempArray);
-			test_List.toArray(tempArray1);
-			char[] tSAX_List;
-			char[] qSAX_List;
-			try {
-				//segment-wise normalization
-				//tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(10), 0.0001);
-				//qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(10), 0.0001);
-				
-				//normalization first for the whole series
-				tSAX_List=saxp.ts2saxNormalizefirst(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(10), 0.00001);
-				qSAX_List=saxp.ts2saxNormalizefirst(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(10), 0.00001);
-				
-				double saxDist=saxp.saxMinDist(qSAX_List, tSAX_List, normalA.getDistanceMatrix(10), test_List.size(), paa_segment);		//test_List.size is time series Length
-				if(saxDist < bestsofar)
-				{
-					test_cLabel=train_List.get(i).cName;
-					bestsofar=saxDist;
-				}
-				
-			} catch (SAXException e) {				
-				e.printStackTrace();
-			}			
-		}		
-		return test_cLabel;		
-	}	*/
 	//simple class to model instances (class + features)
 			static class sampleSeries {	
 				List<Double> Attributes=new ArrayList<Double>();
@@ -112,9 +76,13 @@ public class ucr_TSeries1NNSAX_pretrain {
 			}
 	
 	public static void main(String[] args) {
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TEST";		
-		int paa_segment=64;			
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for CBF dataset
+		int paa_segment=32;			
 		SAXProcessor saxp=new SAXProcessor();		
 		Alphabet normalA = new NormalAlphabet();		
 		char[] tSAX_List;

@@ -9,22 +9,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * Implement ESAX scheme 
+ * check classification accuracy using 1NN ED distance
+ * for UCR time series data sets
+ * Pre-training
+ * 
+ * @author chawt
+ *
+ */
 public class ucr_TSeries1NNESAX_pretrain {
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -163,64 +168,6 @@ public class ucr_TSeries1NNESAX_pretrain {
 			//System.out.println(delta_tsdist[i][0]+", "+delta_tsdist[i][1]);
 		return maxmin_value;
 	}	
-	/*public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment, int saxAlpha)
-	{
-		List<Result>innerList=new ArrayList<Result>();		
-		SAXProcessor saxp=new SAXProcessor();
-		TSProcessor tsp=new TSProcessor();
-		Alphabet normalA = new NormalAlphabet();
-		
-		//Transform train_List to SAX List
-		//List<saxSeries>trainSAX_List=new ArrayList<saxSeries>();		
-		for(int i=0;i< train_List.size();i++){
-			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
-			Double []tempArray1=new Double[test_List.size()];
-			train_List.get(i).Attributes.toArray(tempArray);
-			test_List.toArray(tempArray1);
-			//char[] tSAX_List;
-			//char[] qSAX_List;
-			double[][]tmaxmin_value;
-			double[][]qmaxmin_value;
-			char[][]tmaxmeanmin_char;
-			char[][]qmaxmeanmin_char;
-			double saxDist=0;
-			try {
-				//SAX transformation
-				//tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-				//qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-				
-				//max_min array transform to SAX
-				tmaxmin_value=max_min(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.0001), paa_segment);
-				qmaxmin_value=max_min(tsp.znorm(ArrayUtils.toPrimitive(tempArray1), 0.0001), paa_segment);
-				
-				tmaxmeanmin_char = new char[paa_segment][3];
-				qmaxmeanmin_char = new char[paa_segment][3];
-				
-				for(int d=0;d< tmaxmin_value.length;d++)
-				{
-					tmaxmeanmin_char[d][0]=tsp.num2char(tmaxmin_value[d][0], normalA.getCuts(saxAlpha));
-					tmaxmeanmin_char[d][1]=tsp.num2char(tmaxmin_value[d][1], normalA.getCuts(saxAlpha));
-					tmaxmeanmin_char[d][2]=tsp.num2char(tmaxmin_value[d][2], normalA.getCuts(saxAlpha));
-					qmaxmeanmin_char[d][0]=tsp.num2char(qmaxmin_value[d][0], normalA.getCuts(saxAlpha));
-					qmaxmeanmin_char[d][1]=tsp.num2char(qmaxmin_value[d][1], normalA.getCuts(saxAlpha));
-					qmaxmeanmin_char[d][2]=tsp.num2char(qmaxmin_value[d][2], normalA.getCuts(saxAlpha));
-					
-					//calculate distance
-					 saxDist +=saxp.EsaxMinDist(qmaxmeanmin_char[d], tmaxmeanmin_char[d], normalA.getDistanceMatrix(saxAlpha));	//test_List.size is time series Leng
-				}
-				double fsaxDist=((double)test_List.size()/(double)paa_segment)*saxDist;
-				
-				innerList.add(new Result(fsaxDist, train_List.get(i).cName));
-				//trainSAX_List.add(new saxSeries(train_List.get(i).cName, tSAX_List));
-			} catch (SAXException e) {				
-				e.printStackTrace();
-			}
-			
-		}
-		Collections.sort(innerList, new DistanceComparator());
-		int test_cLabel=innerList.get(0).cName;
-		return test_cLabel;		
-	}	*/
 	//simple class to model instances (class + features)
 			static class sampleSeries {	
 				List<Double> Attributes=new ArrayList<Double>();
@@ -248,8 +195,11 @@ public class ucr_TSeries1NNESAX_pretrain {
 			}
 	
 	public static void main(String[] args) {		
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TEST";
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();
 		Alphabet normalA = new NormalAlphabet();
@@ -260,10 +210,12 @@ public class ucr_TSeries1NNESAX_pretrain {
 		char[][]qmaxmeanmin_char;
 		long totaltime=0;
 		int corrected=0;
+		//fixed parameter for each dataset 
+		//for CBF dataset
 		int paa_segment=64;
 		int saxAlpha=10;
 			
-		for(int s=0;s< 25; s++){			
+				
 		ArrayList<double[][]>train_arr=new ArrayList<double[][]>();			
 		List<sampleSeries>train_List=dataLoad(train_filename);		
 		for (int i=0;i< train_List.size();i++){
@@ -304,13 +256,7 @@ public class ucr_TSeries1NNESAX_pretrain {
 				}
 				double fsaxDist=((double)test_List.size()/(double)paa_segment)*saxDist;
 				innerList.add(new Result(fsaxDist,train_List.get(j).cName));				
-				/*if(fsaxDist < best_so_far){
-					test_cLabel=train_List.get(j).cName;
-					best_so_far=fsaxDist;				
-				}*/
-				
-		}
-			//int predicted_cLabel = classification_algorithm(train_List, test_List.get(i).Attributes, paa_segment[f], saxAlpha[f]);			
+			}
 			Collections.sort(innerList,new DistanceComparator());
 			test_cLabel=innerList.get(0).cName;
 			if(test_cLabel == test_List.get(i).cName) corrected = corrected + 1;
@@ -321,7 +267,7 @@ public class ucr_TSeries1NNESAX_pretrain {
 			long elapsedTimeInMillis_1 =endTime - startTime;
 			totaltime+=elapsedTimeInMillis_1;
 			//System.out.println("Time for calculation: "+ elapsedTimeInMillis_1 + " ms");
-		}
+		
 			System.out.println("Time for calculation: "+ (totaltime/25.0)/(1000.0) + " ms");			
 		}		
 	}

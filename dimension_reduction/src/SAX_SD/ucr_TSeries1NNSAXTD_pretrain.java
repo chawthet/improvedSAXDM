@@ -7,20 +7,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import SAX_SD.ucr_TSeries1NNSAXSD_Test.DistanceComparator;
-import SAX_SD.ucr_TSeries1NNSAXSD_Test.Result;
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.TSProcessor;
@@ -212,11 +205,15 @@ public class ucr_TSeries1NNSAXTD_pretrain {
 	}
 
 	public static void main(String[] args) {
-		String train_filename = "D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TRAIN";
-		String test_filename = "D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\wafer\\wafer_TEST";
-		//int corrected = 0;
-		int paa_segment = 64;
-		int saxAlpha = 10;
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for CBF dataset
+		int paa_segment=4;	
+		int saxAlpha=10;
+		
 		TSProcessor tsp = new TSProcessor();
 		SAXProcessor saxp = new SAXProcessor();
 		Alphabet normalA = new NormalAlphabet();

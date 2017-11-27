@@ -5,22 +5,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.TSProcessor;
@@ -170,7 +164,6 @@ public class ucr_TSeries1NNSAXSD_Exectime{
 	}	
 	public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment, int saxAlpha)
 	{
-		List<Result>innerList=new ArrayList<Result>();		
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();
 		Alphabet normalA = new NormalAlphabet();
@@ -253,15 +246,18 @@ public class ucr_TSeries1NNSAXSD_Exectime{
 			}
 	
 	public static void main(String[] args) {
-		ResourceBundle.clearCache();
-		String train_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\ECG200\\ECG200_TRAIN";
-		String test_filename="D:\\D1\\UCR_TS_Archive_2015\\22_Datasets_SAX\\ECG200\\ECG200_TEST";
+		if(args.length ==0){
+			System.exit(-1);
+		}
+		String train_filename= args[0];
+		String test_filename=args[1];
+		//fixed parameter for CBF data set
 		int corrected=0;
-		int paa_segment=64;
+		int paa_segment=4;
 		int saxAlpha=10;
 		long totaltime=0;
 		double temp_dist=0;
-		//for (int z=0;z< 25; z++){
+		for (int z=0;z< 25; z++){
 		
 			long startTime=System.currentTimeMillis();
 			List<sampleSeries>train_List=dataLoad(train_filename);
@@ -281,7 +277,7 @@ public class ucr_TSeries1NNSAXSD_Exectime{
 				long elapsedTimeInMillis_1 = endTime - startTime;	
 				totaltime=elapsedTimeInMillis_1;
 				ResourceBundle.clearCache();
-		//}		
+		}		
 		System.out.println("*******************************************");
 		System.out.println("Corrected Label "+ corrected +"Error Rate: "+ temp_dist);
 		System.out.println("Total Execution time for segment size: "+ paa_segment + " : "+ totaltime + "msec");
