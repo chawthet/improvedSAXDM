@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="jfreechart-1.0.19.jar"/>
 	<classpathentry kind="lib" path="guava-18.0.jar"/>
 	<classpathentry kind="lib" path="commons-lang3-3.0.jar"/>
+	<classpathentry kind="lib" path="jmotif-sax-1.1.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
