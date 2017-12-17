@@ -22,13 +22,25 @@ import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
 /**
- * Implement ESAX scheme 
+ * Implement ESAX scheme for comparing with our proposed SAXSD method
  * check classification accuracy using 1NN ED distance
  * for UCR time series data sets
- * Pre-training
+ * 
+ * Pre-training and check execution time 
  * 
  * @author chawt
  *
+ */
+/*
+ * 4-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[3]- alphabet size(Number of alphabet represented for each segment)
+ * 
+ * args[0] and args[1] are String data types.
+ * args[2] and args[3] are integer data types.  
+ * 
  */
 public class ucr_TSeries1NNESAX_pretrain {
 
@@ -195,11 +207,16 @@ public class ucr_TSeries1NNESAX_pretrain {
 			}
 	
 	public static void main(String[] args) {		
-		if(args.length ==0){
+		if(args.length < 4){
+			System.out.println("Invalid numbers of arguments OR type of arguments");
 			System.exit(-1);
 		}
+		
 		String train_filename= args[0];
 		String test_filename=args[1];
+		int paa_segment=Integer.parseInt(args[2]);
+		int saxAlpha=Integer.parseInt(args[3]);
+		
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();
 		Alphabet normalA = new NormalAlphabet();
@@ -210,13 +227,8 @@ public class ucr_TSeries1NNESAX_pretrain {
 		char[][]qmaxmeanmin_char;
 		long totaltime=0;
 		int corrected=0;
-		//fixed parameter for each dataset 
-		//for CBF dataset
-		int paa_segment=64;
-		int saxAlpha=10;
-			
-				
 		ArrayList<double[][]>train_arr=new ArrayList<double[][]>();			
+		long startTime=System.currentTimeMillis();	
 		List<sampleSeries>train_List=dataLoad(train_filename);		
 		for (int i=0;i< train_List.size();i++){
 			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
@@ -224,9 +236,10 @@ public class ucr_TSeries1NNESAX_pretrain {
 			tmaxmin_value=max_min(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.00001), paa_segment);
 			train_arr.add(tmaxmin_value);
 		}
-		long startTime=System.currentTimeMillis();	
+		
 		List<sampleSeries>test_List=dataLoad(test_filename);
 		corrected=0;
+			
 		for(int i=0;i< test_List.size();i++){			
 			Double []tempArray1=new Double[test_List.get(i).Attributes.size()];
 			test_List.get(i).Attributes.toArray(tempArray1);			
@@ -237,8 +250,7 @@ public class ucr_TSeries1NNESAX_pretrain {
 			qmaxmeanmin_char = new char[paa_segment][3];
 			List<Result>innerList=new ArrayList<Result>();
 			for (int j=0;j < train_List.size();j++){
-				double saxDist=0;
-				
+				double saxDist=0;					
 				for(int d=0;d< train_arr.get(j).length;d++)
 				{
 					try {
@@ -250,25 +262,25 @@ public class ucr_TSeries1NNESAX_pretrain {
 						qmaxmeanmin_char[d][2]=tsp.num2char(qmaxmin_value[d][2], normalA.getCuts(saxAlpha));
 						//calculate distance
 						 saxDist+=saxp.EsaxMinDist(qmaxmeanmin_char[d], tmaxmeanmin_char[d], normalA.getDistanceMatrix(saxAlpha));	//test_List.size is time series Length
-					} catch (SAXException e) {
-						e.printStackTrace();
-					}					
+						} catch (SAXException e) {
+								e.printStackTrace();
+							}					
+						}
+					double fsaxDist=((double)test_List.size()/(double)paa_segment)*saxDist;
+					innerList.add(new Result(fsaxDist,train_List.get(j).cName));				
 				}
-				double fsaxDist=((double)test_List.size()/(double)paa_segment)*saxDist;
-				innerList.add(new Result(fsaxDist,train_List.get(j).cName));				
+				Collections.sort(innerList,new DistanceComparator());
+				test_cLabel=innerList.get(0).cName;
+				if(test_cLabel == test_List.get(i).cName) corrected = corrected + 1;
 			}
-			Collections.sort(innerList,new DistanceComparator());
-			test_cLabel=innerList.get(0).cName;
-			if(test_cLabel == test_List.get(i).cName) corrected = corrected + 1;
-		}
+				
 			System.out.println("Corrected Label "+ corrected);
 			System.out.println("The error rate is "+ (double)(test_List.size() - corrected)/(double)test_List.size());
 			long endTime = System.currentTimeMillis();
 			long elapsedTimeInMillis_1 =endTime - startTime;
 			totaltime+=elapsedTimeInMillis_1;
-			//System.out.println("Time for calculation: "+ elapsedTimeInMillis_1 + " ms");
-		
-			System.out.println("Time for calculation: "+ (totaltime/25.0)/(1000.0) + " ms");			
+					
+			System.out.println("Time for calculation: "+ totaltime + " ms");			
 		}		
 	}
 

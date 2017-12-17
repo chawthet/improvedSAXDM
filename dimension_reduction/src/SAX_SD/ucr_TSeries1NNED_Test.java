@@ -14,10 +14,20 @@ import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
 /**
- * Check classification accuracy for UCR time series data sets.
+ * Implement 1NNED on raw time series data for comparing with our proposed SAXSD method
+ * Check classification accuracy with UCR time series data sets.
+ * 
  * Distance measures: 1NNED (1Nearest Neighbor Euclidean Distance)  
  * @author chawt
  *
+ */
+/*
+ * 2-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * 
+ * Both are String data types.
+ * 
  */
 public class ucr_TSeries1NNED_Test {
 
@@ -93,7 +103,8 @@ public class ucr_TSeries1NNED_Test {
 			}
 	
 	public static void main(String[] args) {
-		if(args.length ==0){
+		if(args.length < 2){
+			System.out.println("Invalid number of arguments OR type of arguemnts");
 			System.exit(-1);
 		}
 		String train_filename= args[0];

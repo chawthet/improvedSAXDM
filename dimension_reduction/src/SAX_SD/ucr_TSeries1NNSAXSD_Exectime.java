@@ -21,6 +21,25 @@ import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * Implement proposed method SAXSD scheme 
+ * check classification accuracy using 1NN ED distance
+ * for UCR time series data sets
+ * check execution time for each data set
+ * The best parameters (segment size and alphabet size)were shown in published paper.
+ * @author chawt
+ *
+ */
+/*
+ * 4-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[3]- alphabet size(Number of alphabet represented for each segment)
+ * args[0] and args[1] are String data types.
+ * args[2] and args[3] are integer data types.  
+ * 
+ */
 public class ucr_TSeries1NNSAXSD_Exectime{
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -195,7 +214,8 @@ public class ucr_TSeries1NNSAXSD_Exectime{
 				double SDDist=0;
 				for(int d=0;d< tSD_value.length;d++)
 				{				
-					SDDist+=((double)paa_segment/(double)test_List.size())*Math.pow((qSD_value[d]- tSD_value[d]), 2);				
+					//SDDist+=((double)paa_segment/(double)test_List.size())*Math.pow((qSD_value[d]- tSD_value[d]), 2);
+					SDDist+=Math.pow((qSD_value[d]- tSD_value[d]), 2);	
 					
 				}
 				double saxDist=saxp.saxMinDist_update(qSAX_List, tSAX_List, normalA.getDistanceMatrix(saxAlpha), test_List.size(), paa_segment);
@@ -246,40 +266,36 @@ public class ucr_TSeries1NNSAXSD_Exectime{
 			}
 	
 	public static void main(String[] args) {
-		if(args.length ==0){
+		if(args.length < 4){
+			System.out.println("Invalid number of arguments OR types of arguments");
 			System.exit(-1);
 		}
 		String train_filename= args[0];
 		String test_filename=args[1];
-		//fixed parameter for CBF data set
-		int corrected=0;
-		int paa_segment=4;
-		int saxAlpha=10;
+		int paa_segment=Integer.parseInt(args[2]);
+		int saxAlpha=Integer.parseInt(args[3]);
+		
 		long totaltime=0;
 		double temp_dist=0;
-		for (int z=0;z< 25; z++){
-		
-			long startTime=System.currentTimeMillis();
+		int corrected=0;
+		long startTime=System.currentTimeMillis();
+		for (int z=0;z< 25; z++){		
 			List<sampleSeries>train_List=dataLoad(train_filename);
-			List<sampleSeries>test_List=dataLoad(test_filename);
-			/*Set<Integer>tLabel=new HashSet<Integer>();
-			for(int i=0;i< train_List.size();i++){
-				tLabel.add(train_List.get(i).cName);			
-			}*/
-				//corrected=0;
-				for(int i=0;i< test_List.size();i++){			
-					int predicted_cLabel = classification_algorithm(train_List, test_List.get(i).Attributes, paa_segment, saxAlpha);
-					//System.out.println("Test cLabel"+predicted_cLabel);
-					if(predicted_cLabel == test_List.get(i).cName) corrected = corrected + 1;
+			List<sampleSeries>test_List=dataLoad(test_filename);					
+			corrected=0;
+			for(int i=0;i< test_List.size();i++){			
+				int predicted_cLabel = classification_algorithm(train_List, test_List.get(i).Attributes, paa_segment, saxAlpha);
+				if(predicted_cLabel == test_List.get(i).cName) corrected = corrected + 1;
 				}
 				temp_dist=(double)(test_List.size() - corrected)/(double)test_List.size();
-				long endTime = System.currentTimeMillis();
-				long elapsedTimeInMillis_1 = endTime - startTime;	
-				totaltime=elapsedTimeInMillis_1;
-				ResourceBundle.clearCache();
-		}		
+				
+		}	
+		long endTime = System.currentTimeMillis();
+		long elapsedTimeInMillis_1 = endTime - startTime;	
+		totaltime=elapsedTimeInMillis_1;
+	
 		System.out.println("*******************************************");
-		System.out.println("Corrected Label "+ corrected +"Error Rate: "+ temp_dist);
-		System.out.println("Total Execution time for segment size: "+ paa_segment + " : "+ totaltime + "msec");
+		System.out.println("Corrected Label "+ corrected +"\nError Rate: "+ temp_dist);
+		System.out.println("Total Execution time for : "+ totaltime/25.0 + "ms");
 	}
 }

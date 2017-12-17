@@ -20,6 +20,26 @@ import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * Implement proposed method SAXSD scheme 
+ * check classification accuracy using 1NN ED distance
+ * for UCR time series data sets
+ * check execution time for each data set
+ * The best parameters (segment size and alphabet size)were shown in published paper.
+ * @author chawt
+ *
+ * Pre-training 
+ */
+/*
+ * 4-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[3]- alphabet size(Number of alphabet represented for each segment)
+ * args[0] and args[1] are String data types.
+ * args[2] and args[3] are integer data types.  
+ * 
+ */
 public class ucr_TSeries1NNSAXSD_pretrain{
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -190,14 +210,14 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 			}
 	
 	public static void main(String[] args) {
-		if(args.length ==0){
+		if(args.length < 4){
+			System.out.println("Invalid number of arguments OR types of parameters");
 			System.exit(-1);
 		}
 		String train_filename= args[0];
 		String test_filename=args[1];
-		//fixed parameter for CBF dataset
-		int paa_segment=4;
-		int saxAlpha=10;
+		int paa_segment=Integer.parseInt(args[2]);
+		int saxAlpha=Integer.parseInt(args[3]);
 		SAXProcessor saxp=new SAXProcessor();
 		TSProcessor tsp=new TSProcessor();
 		Alphabet normalA = new NormalAlphabet();
@@ -210,8 +230,9 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 		
 		ArrayList<char[]>tranf_List=new ArrayList<char[]>();
 		ArrayList<double[]>tranf_List1=new ArrayList<double[]>();
-		for(int t=0;t< 25;t++){
-			int corrected=0;
+		int corrected=0;
+		long startTime=System.currentTimeMillis();
+		
 		List<sampleSeries>train_List=dataLoad(train_filename);
 		for(int i=0;i< train_List.size();i++){
 			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
@@ -224,10 +245,8 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 			} catch (SAXException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			
+			}			
 		}
-		long startTime=System.currentTimeMillis();
 			List<sampleSeries>test_List=dataLoad(test_filename);			
 			for(int i=0;i< test_List.size();i++){
 				double best_so_far=Double.POSITIVE_INFINITY;
@@ -269,7 +288,7 @@ public class ucr_TSeries1NNSAXSD_pretrain{
 				
 		System.out.println("*******************************************");
 		System.out.println("Corrected Label "+ corrected +"\nError Rate: "+ temp_dist);
-		}
-		System.out.println("\nExecution Time: "+totaltime/25.0+" ms");
+		
+		System.out.println("\nExecution Time: "+totaltime+" ms");
 	}
 }

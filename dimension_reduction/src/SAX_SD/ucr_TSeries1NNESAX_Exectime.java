@@ -23,12 +23,24 @@ import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
 /**
- * Implement ESAX scheme 
+ * Implement ESAX scheme for comparing with our proposed SAXSD method
  * check classification accuracy using 1NN ED distance
  * for UCR time series data sets
- * check execution time for each data set
+ * 
+ * Check execution time for average of 25 times 
+ * 
  * @author chawt
  *
+ */
+/*
+ * 4-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[3]- alphabet size(Number of alphabet represented for each segment)
+ * args[0] and args[1] are String data types.
+ * args[2] and args[3] are integer data types.  
+ * 
  */
 public class ucr_TSeries1NNESAX_Exectime {
 
@@ -271,18 +283,20 @@ public class ucr_TSeries1NNESAX_Exectime {
 			}
 	
 	public static void main(String[] args) {
-		if(args.length ==0){
+		if(args.length < 4){
+			System.out.println("Invalid number of arguments OR type of arguments");
 			System.exit(-1);
 		}
 		String train_filename= args[0];
 		String test_filename=args[1];
-		//fixed parameter for each dataset
-		int paa_segment=64;
-		int saxAlpha=10;
+		int paa_segment=Integer.parseInt(args[2]);
+		int saxAlpha=Integer.parseInt(args[3]);
+		
 		int corrected=0;
 		long totaltime = 0;
 		double temp_dist=0;
-			long startTime=System.currentTimeMillis();
+		long startTime=System.currentTimeMillis();
+		for (int y=0;y<25;y++){				
 			List<sampleSeries>train_List=dataLoad(train_filename);
 			List<sampleSeries>test_List=dataLoad(test_filename);
 			
@@ -296,12 +310,13 @@ public class ucr_TSeries1NNESAX_Exectime {
 						if(predicted_cLabel == test_List.get(i).cName) corrected = corrected + 1;
 			}
 					temp_dist=(double)(test_List.size() - corrected)/(double)test_List.size();
-					long endTime = System.currentTimeMillis();
-					long elapsedTimeInMillis_1 = endTime - startTime;
-					totaltime=elapsedTimeInMillis_1;	
-					
+						
+		}
+		long endTime = System.currentTimeMillis();
+		long elapsedTimeInMillis_1 = endTime - startTime;
+		totaltime=elapsedTimeInMillis_1;			
 		System.out.println("*******************************************");
-		System.out.println("Corrected Label "+ corrected +"Error Rate: "+ temp_dist);
-		System.out.println("Total Execution time for segment size: "+ paa_segment + " : "+ totaltime + "msec");
-			}
+		System.out.println("Corrected Label "+ corrected +"\nError Rate: "+ temp_dist);
+		System.out.println("Total Execution time: "+ totaltime/25.0 + " msec");
+		}
 }	

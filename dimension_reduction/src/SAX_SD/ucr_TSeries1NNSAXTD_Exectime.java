@@ -22,6 +22,26 @@ import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * Implement SAXTD scheme 
+ * for comparing classification accuracy with our proposed method
+ * for UCR time series data sets
+ * 
+ * The best parameters (segment size and alphabet size)were shown in published paper.
+ * 
+ * @author chawt
+ * 
+ */
+/*
+ * 4-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[3]- alphabet size(Number of alphabet represented for each segment)
+ * args[0] and args[1] are String data types.
+ * args[2] and args[3] are integer data types.  
+ * 
+ */
 public class ucr_TSeries1NNSAXTD_Exectime {
 	
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -221,14 +241,14 @@ public class ucr_TSeries1NNSAXTD_Exectime {
 	
 	public static void main(String[] args) {
 		
-		if(args.length ==0){
+		if(args.length < 4){
+			System.out.println("Invalid number of arguemnts OR types of arguments");
 			System.exit(-1);
 		}
 		String train_filename= args[0];
 		String test_filename=args[1];
-		//fixed parameter for CBF dataset
-		int paa_segment=4;	
-		int saxAlpha=10;
+		int paa_segment=Integer.parseInt(args[2]);	
+		int saxAlpha=Integer.parseInt(args[3]);
 		
 		int corrected=0;
 		long totaltime=0;
@@ -255,8 +275,8 @@ public class ucr_TSeries1NNSAXTD_Exectime {
 				}
 		
 		System.out.println("*******************************************");
-		System.out.println("Corrected Label "+ corrected +"Error Rate: "+ temp_dist);
-		System.out.println("Total Execution time for segment size: "+ paa_segment + " : "+ totaltime/25.0+ "msec");
+		System.out.println("Corrected Label "+ corrected +"\nError Rate: "+ temp_dist);
+		System.out.println("Total Execution time: "+ totaltime/25.0+ "msec");
 	}	
 }
 

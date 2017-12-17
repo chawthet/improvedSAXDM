@@ -8,22 +8,35 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import net.seninp.jmotif.distance.EuclideanDistance;
 import net.seninp.jmotif.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
-import net.seninp.jmotif.sax.TSProcessor;
 import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
+/**
+ * implement SAX representation 
+ * check 1NNED classification accuracy for UCR time series data sets
+ * Pre-train
+ * @author chawt
+ *
+ */
+/*
+ * 3-inputs arguments have to be supported
+ * args[0]- trainFile 
+ * args[1]- testFile
+ * args[2]- segment size (Number of segments)
+ * args[0] and args[1] are String data types.
+ * args[2] is integer data types.  
+ * 
+ * alphabet size(Number of alphabet represented for each segment) is fixed 10. 
+ * 
+ */
 public class ucr_TSeries1NNSAX_pretrain {
 
 	public static List<sampleSeries>  dataLoad(String filename){
@@ -76,21 +89,22 @@ public class ucr_TSeries1NNSAX_pretrain {
 			}
 	
 	public static void main(String[] args) {
-		if(args.length ==0){
+		if(args.length < 3){
+			System.out.println("Invalid input arguments");
 			System.exit(-1);
 		}
 		String train_filename= args[0];
 		String test_filename=args[1];
-		//fixed parameter for CBF dataset
-		int paa_segment=32;			
+		int paa_segment=Integer.parseInt(args[2]);			
 		SAXProcessor saxp=new SAXProcessor();		
 		Alphabet normalA = new NormalAlphabet();		
 		char[] tSAX_List;
 		char[] qSAX_List = null;
 		long totaltime=0;
 		
-		for(int s=0;s< 25;s++){	
-			int corrected=0;
+		int corrected=0;
+		
+		long startTime=System.currentTimeMillis();	
 		ArrayList<char[]>trainpre=new ArrayList<char[]>();
 		List<sampleSeries>train_List=dataLoad(train_filename);
 		for(int i=0;i< train_List.size();i++){
@@ -104,7 +118,6 @@ public class ucr_TSeries1NNSAX_pretrain {
 				e.printStackTrace();
 			}			
 		}
-		long startTime=System.currentTimeMillis();	
 			List<sampleSeries>test_List=dataLoad(test_filename);		
 			for(int j=0;j< test_List.size();j++)
 			{
@@ -147,8 +160,7 @@ public class ucr_TSeries1NNSAX_pretrain {
 			System.out.println("Corrected Label "+ corrected);
 			System.out.println("The error rate is "+ (double)(test_List.size() - corrected)/(double)test_List.size());				
 			totaltime+=elapsedTimeInMillis_1;			
-		}
-		System.out.println("Total Time for calculation of "+ "w size: "+ paa_segment+" = "+ (totaltime/25.0)/(1000.0) + " s");
+			System.out.println("Total Time for calculation of "+" = "+ totaltime + " s");
 	}
 }
 
