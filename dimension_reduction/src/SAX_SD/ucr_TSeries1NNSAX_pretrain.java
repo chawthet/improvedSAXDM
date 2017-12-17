@@ -20,9 +20,10 @@ import net.seninp.jmotif.sax.alphabet.Alphabet;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 
 /**
- * implement SAX representation 
- * check 1NNED classification accuracy for UCR time series data sets
- * Pre-train
+ * implement SAX representation for comparison with our proposed SAXSD method
+ * check 1NNED classification accuracy with UCR time series data sets
+ * 
+ * Pretrain means pre-processing on training dataset individually (Not inline on the classfication algorithm)
  * @author chawt
  *
  */
@@ -160,7 +161,7 @@ public class ucr_TSeries1NNSAX_pretrain {
 			System.out.println("Corrected Label "+ corrected);
 			System.out.println("The error rate is "+ (double)(test_List.size() - corrected)/(double)test_List.size());				
 			totaltime+=elapsedTimeInMillis_1;			
-			System.out.println("Total Time for calculation of "+" = "+ totaltime + " s");
+			System.out.println("Total Time for calculation of "+" = "+ totaltime + " ms");
 	}
 }
 
