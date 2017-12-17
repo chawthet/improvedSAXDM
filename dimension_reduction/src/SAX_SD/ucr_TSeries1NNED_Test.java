@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
 /**
- * Implement 1NNED on raw time series data for comparing with our proposed SAXSD method
+ * Implement 1NNED classification on raw time series data for comparing with our proposed SAXSD method
  * Check classification accuracy with UCR time series data sets.
  * 
  * Distance measures: 1NNED (1Nearest Neighbor Euclidean Distance)  
