@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -183,6 +184,64 @@ public class ucr_TSeries1NNSAXTD_pretrain {
 			return a.distance < b.distance ? -1 : a.distance == b.distance ? 0 : 1;
 		}
 	}
+	
+	public static int classification_algorithm(List<sampleSeries>train_List, List<Double> test_List, int paa_segment, int saxAlpha)
+	{
+		List<Result1>innerList=new ArrayList<Result1>();
+		TSProcessor tsp=new TSProcessor();
+		SAXProcessor saxp=new SAXProcessor();
+		//EuclideanDistance edDist=new EuclideanDistance();
+		Alphabet normalA = new NormalAlphabet();
+		double bestsofar=Double.POSITIVE_INFINITY;
+		int test_cLabel=-99999;
+		//Transform train_List to SAX List
+		//List<saxSeries>trainSAX_List=new ArrayList<saxSeries>();		
+		for(int i=0;i< train_List.size();i++){
+			Double []tempArray=new Double[train_List.get(i).Attributes.size()];
+			Double []tempArray1=new Double[test_List.size()];
+			train_List.get(i).Attributes.toArray(tempArray);
+			test_List.toArray(tempArray1);
+			char[] tSAX_List;
+			char[] qSAX_List;
+			double[][] tdelta_Distance;
+			double[][] qdelta_Distance;
+			
+			try {
+				//SAX Transform
+				tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
+				qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
+				
+				//Delta Distance (Ordinary)
+				//tdelta_Distance=delta_Distance(ArrayUtils.toPrimitive(tempArray), paa_segment);
+				//qdelta_Distance=delta_Distance(ArrayUtils.toPrimitive(tempArray1), paa_segment);
+				
+				//Delta Distance (Normalized)
+				tdelta_Distance=delta_Distance(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.0001), paa_segment);
+				qdelta_Distance=delta_Distance(tsp.znorm(ArrayUtils.toPrimitive(tempArray1), 0.0001), paa_segment);
+				
+				double td_dist = 0;
+				for(int d=0;d< tdelta_Distance.length;d++){
+					double delta_Start=((qdelta_Distance[d][0]-tdelta_Distance[d][0])*(qdelta_Distance[d][0]-tdelta_Distance[d][0]));
+					double delta_End=((qdelta_Distance[d][1]-tdelta_Distance[d][1])*(qdelta_Distance[d][1]-tdelta_Distance[d][1]));
+					td_dist+=((((double)paa_segment/(double)test_List.size()))*Math.pow(Math.sqrt((delta_Start + delta_End)),2.0));													
+				}		
+				double saxDist=saxp.saxMinDist_update(qSAX_List, tSAX_List, normalA.getDistanceMatrix(saxAlpha), test_List.size(), paa_segment);
+				double saxTD_Dist= (Math.sqrt((double) test_List.size()/(double) paa_segment))*Math.sqrt(td_dist + saxDist);
+				//innerList.add(new Result1(saxTD_Dist, train_List.get(i).cName));
+				//trainSAX_List.add(new saxSeries(train_List.get(i).cName, tSAX_List));
+				if(saxTD_Dist < bestsofar){
+					test_cLabel=train_List.get(i).cName;
+					bestsofar=saxTD_Dist;
+				}
+			} catch (SAXException e) {				
+				e.printStackTrace();
+			}
+			
+		}
+		//Collections.sort(innerList, new DistanceComparator1());
+		//int test_cLabel=innerList.get(0).cName;
+		return test_cLabel;		
+	}	
 
 	public static void main(String[] args) {
 		if(args.length < 4){
@@ -194,73 +253,21 @@ public class ucr_TSeries1NNSAXTD_pretrain {
 		int paa_segment=Integer.parseInt(args[2]);	
 		int saxAlpha=Integer.parseInt(args[3]);
 		
-		TSProcessor tsp = new TSProcessor();
-		SAXProcessor saxp = new SAXProcessor();
-		Alphabet normalA = new NormalAlphabet();
-		long totaltime=0;
-		char[] tSAX_List;
-		char[] qSAX_List = null;
-		double[][] tdelta_Distance;
-		double[][] qdelta_Distance = null;
 		
-		ArrayList<char[]>pre_List=new ArrayList<char[]>();
-		ArrayList<double[][]>pre_List1=new ArrayList<double[][]>();
+		int corrected=0;
+		
 		
 		long startTime = System.currentTimeMillis();
 		List<sampleSeries> train_List = dataLoad(train_filename);
-			
-		for(int i=0;i< train_List.size();i++)
-		{
-			Double[] tempArray = new Double[train_List.get(i).Attributes.size()];
-			train_List.get(i).Attributes.toArray(tempArray);
-			try {
-				tSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray), paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-				tdelta_Distance=delta_Distance(tsp.znorm(ArrayUtils.toPrimitive(tempArray), 0.0001), paa_segment);
-				pre_List.add(tSAX_List);
-				pre_List1.add(tdelta_Distance);
-			} catch (SAXException e) {			
-				e.printStackTrace();
-			}			
-		}					
-		int corrected=0;
 		List<sampleSeries> test_List = dataLoad(test_filename);
-			for (int i = 0; i < test_List.size(); i++) {
-				double bestsofar=Double.POSITIVE_INFINITY;
-				int test_cLabel = -99999;
-				Double[] tempArray1 = new Double[test_List.get(i).Attributes.size()];
-				test_List.get(i).Attributes.toArray(tempArray1);				
-				try {
-					qSAX_List = saxp.ts2string(ArrayUtils.toPrimitive(tempArray1),paa_segment, normalA.getCuts(saxAlpha), 0.0001);
-					qdelta_Distance = delta_Distance(tsp.znorm(ArrayUtils.toPrimitive(tempArray1), 0.0001),paa_segment);
-					} catch (SAXException e1) {
-						e1.printStackTrace();
-					}
-					for(int j=0;j< train_List.size();j++){						
-						try {							
-							double td_dist = 0;
-							for (int d = 0; d < qdelta_Distance.length; d++) {
-								double delta_Start = ((qdelta_Distance[d][0] - pre_List1.get(j)[d][0]) * (qdelta_Distance[d][0] - pre_List1.get(j)[d][0]));
-								double delta_End = ((qdelta_Distance[d][1] - pre_List1.get(j)[d][1]) * (qdelta_Distance[d][1] - pre_List1.get(j)[d][1]));
-								td_dist += ((((double) paa_segment / (double) test_List.size())) * Math.pow(Math.sqrt((delta_Start + delta_End)), 2.0));
-							}
-							
-							double saxDist = saxp.saxMinDist_update(qSAX_List, pre_List.get(j),normalA.getDistanceMatrix(saxAlpha), test_List.size(),paa_segment);
-							double saxTD_Dist = (Math.sqrt((double) test_List.size()/(double) paa_segment))*Math.sqrt(td_dist + saxDist);
-							if (saxTD_Dist < bestsofar) {
-								test_cLabel = train_List.get(j).cName;
-								bestsofar = saxTD_Dist;
-							}
-						} catch (SAXException e) {
-							e.printStackTrace();
-						}	
-					}										
-					if (test_cLabel == test_List.get(i).cName)
-						corrected = corrected + 1;					
-				}
-			double temp_dist = (double) (test_List.size() - corrected)/ (double) test_List.size();
-			long endTime = System.currentTimeMillis();
-			totaltime = endTime - startTime;
-			System.out.println("ErrorRate: " + temp_dist + "\nCorrected Label "+ corrected + "\nwith paa_segment & alpha size"+ paa_segment + " : " + saxAlpha);
-			System.out.println("\nExecutionTime:"	+ totaltime+" ms");
+		
+		corrected=0;
+		for(int i=0;i< test_List.size();i++){			
+			int predicted_cLabel = classification_algorithm(train_List, test_List.get(i).Attributes, paa_segment, saxAlpha);			
+			if(predicted_cLabel == test_List.get(i).cName) corrected = corrected + 1;
+		}
+		double temp_dist=(double)(test_List.size() - corrected)/(double)test_List.size();
+		long execTime = System.currentTimeMillis() - startTime;
+		System.out.println("ErrorRate: "+temp_dist+"\nCorrected Label "+ corrected + "\nwith paa_segment & alpha size"+ paa_segment + " : " +saxAlpha+"\nExecutionTime:"+execTime);
 		}
 }
